@@ -1,7 +1,7 @@
 name = "ACETestUtils"
 uuid = "b973b150-f408-4aa5-b6a2-f0e33df46af3"
 authors = ["Christoph Ortner <christophortner0@gmail.com> and contributors"]
-version = "0.1.0-DEV"
+version = "0.1.0"
 
 [deps]
 MLDataDevices = "7e8f7934-dd98-4c1a-8fe8-92b47a384d40"
