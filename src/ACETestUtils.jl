@@ -10,6 +10,40 @@ export gpu_test_backend
 # NamedTuple. Replaces the old `Main`-global include-guard in `utils_gpu.jl`.
 const _GPU_TEST_BACKEND = Ref{Any}(nothing)
 
+# Finite-difference / display test helpers (fdtest, dirfdtest, print_tf, … )
+include("testing.jl")
+
+# Lux-model gradient-testing helpers. These are implemented in
+# `ext/ACETestUtilsGradExt.jl`, which loads only when Zygote, ForwardDiff and
+# Optimisers are all present, so the heavy AD stack stays out of the core
+# package. Calling these without those packages loaded throws a MethodError.
+export grad_zy, grad_zy_ps, grad_fd_ps
+
+"""
+    grad_zy(X, model, ps, st)
+
+Zygote gradient of `model(·, ps, st)[1]` with respect to the input `X`.
+Requires `Zygote`, `ForwardDiff` and `Optimisers` to be loaded (extension).
+"""
+function grad_zy end
+
+"""
+    grad_zy_ps(X, model, ps, st)
+
+Zygote gradient of `model(X, ·, st)[1]` with respect to the parameters `ps`.
+Requires `Zygote`, `ForwardDiff` and `Optimisers` to be loaded (extension).
+"""
+function grad_zy_ps end
+
+"""
+    grad_fd_ps(G, model, ps, st)
+
+ForwardDiff gradient of `model(G, ·, st)[1]` with respect to the parameters
+`ps`, via `Optimisers.destructure`. Requires `Zygote`, `ForwardDiff` and
+`Optimisers` to be loaded (extension).
+"""
+function grad_fd_ps end
+
 """
     detect_gpu_backend() -> String
 
