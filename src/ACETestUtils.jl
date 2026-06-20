@@ -12,10 +12,11 @@ include("gpudetect.jl")
 # Generic Lux-model gradient-testing helpers. The implementations live in
 # package extensions that load only when the relevant AD package is present, so
 # the heavy AD stack stays out of the core package:
-#   * `grad_zy`, `grad_zy_ps`  → `ext/ACETestUtilsZygoteExt.jl`      (Zygote)
-#   * `grad_fd_ps`             → `ext/ACETestUtilsForwardDiffExt.jl` (ForwardDiff)
-# Calling these without the relevant package loaded throws a `MethodError`.
-export grad_zy, grad_zy_ps, grad_fd_ps
+#   * `grad_zy`, `grad_zy_ps`   → `ext/ACETestUtilsZygoteExt.jl`      (Zygote)
+#   * `grad_fwd`, `grad_fwd_ps` → `ext/ACETestUtilsForwardDiffExt.jl` (ForwardDiff)
+# `fwd` denotes ForwardDiff (not finite difference — cf. `fdtest`). Calling
+# these without the relevant package loaded throws a `MethodError`.
+export grad_zy, grad_zy_ps, grad_fwd, grad_fwd_ps
 
 """
     grad_zy(X, model, ps, st)
@@ -34,12 +35,20 @@ Requires `Zygote` to be loaded (extension).
 function grad_zy_ps end
 
 """
-    grad_fd_ps(G, model, ps, st)
+    grad_fwd(X, model, ps, st)
+
+ForwardDiff gradient of `model(·, ps, st)[1]` with respect to the input `X`
+(`X` must be a real array). Requires `ForwardDiff` to be loaded (extension).
+"""
+function grad_fwd end
+
+"""
+    grad_fwd_ps(G, model, ps, st)
 
 ForwardDiff gradient of `model(G, ·, st)[1]` with respect to the parameters
 `ps`, via `Optimisers.destructure`. Requires `ForwardDiff` to be loaded
 (extension).
 """
-function grad_fd_ps end
+function grad_fwd_ps end
 
 end # module ACETestUtils

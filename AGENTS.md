@@ -10,11 +10,12 @@ UUID: `b973b150-f408-4aa5-b6a2-f0e33df46af3`
 
 - Core helpers (`gpu_test_backend`, `fdtest`, `dirfdtest`, `print_tf`,
   `println_slim`) are always available with `using ACETestUtils`.
-- Gradient helpers (`grad_zy`, `grad_zy_ps`, `grad_fd_ps`) live in **package
-  extensions** and only work once the relevant AD package is also loaded:
+- Gradient helpers live in **package extensions** and only work once the
+  relevant AD package is also loaded:
   - `grad_zy`, `grad_zy_ps` → also `using Zygote`
-  - `grad_fd_ps` → also `using ForwardDiff`
+  - `grad_fwd`, `grad_fwd_ps` → also `using ForwardDiff`
   Calling them without the trigger package loaded throws a `MethodError`.
+  (`fwd` = ForwardDiff, not finite difference — the FD tests are `fdtest`.)
 
 ## What's provided, when to use it, how
 
@@ -65,18 +66,21 @@ UUID: `b973b150-f408-4aa5-b6a2-f0e33df46af3`
   println()
   ```
 
-### `grad_zy` / `grad_zy_ps` / `grad_fd_ps` — Lux-model gradient helpers (extensions)
+### `grad_zy` / `grad_zy_ps` / `grad_fwd` / `grad_fwd_ps` — Lux-model gradient helpers (extensions)
 
 - **When:** testing a Lux-style `model(X, ps, st)` (returns `(y, st)`); get a
   reference gradient w.r.t. input or parameters to compare against your own.
+  Pick the AD backend you want to check against (Zygote vs ForwardDiff).
 - **How:** load the AD package alongside ACETestUtils.
   ```julia
   using ACETestUtils, Zygote, ForwardDiff
-  grad_zy(X, model, ps, st)      # Zygote ∂/∂X of model(·, ps, st)[1]
-  grad_zy_ps(X, model, ps, st)   # Zygote ∂/∂ps of model(X, ·, st)[1]
-  grad_fd_ps(G, model, ps, st)   # ForwardDiff ∂/∂ps via Optimisers.destructure
+  grad_zy(X, model, ps, st)       # Zygote      ∂/∂X  of model(·, ps, st)[1]
+  grad_fwd(X, model, ps, st)      # ForwardDiff ∂/∂X  (X must be a real array)
+  grad_zy_ps(X, model, ps, st)    # Zygote      ∂/∂ps of model(X, ·, st)[1]
+  grad_fwd_ps(G, model, ps, st)   # ForwardDiff ∂/∂ps via Optimisers.destructure
   ```
-- **Gotcha:** `grad_fd_ps` relies on `Optimisers.destructure`, which only
+- **Naming:** `fwd` = ForwardDiff (not finite difference; those are `fdtest`).
+- **Gotcha:** `grad_fwd_ps` relies on `Optimisers.destructure`, which only
   flattens **array** parameter leaves — scalar parameters are ignored (you get
   `ps` back unchanged). Use array-valued params (as real Lux layers have).
 - **Not here:** the ETGraph-specific `grad_fd` stays in EquivariantTensors.jl —

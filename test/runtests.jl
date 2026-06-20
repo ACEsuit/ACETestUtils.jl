@@ -32,15 +32,16 @@ using Zygote, ForwardDiff   # trigger ACETestUtilsZygoteExt / ACETestUtilsForwar
    end
 
    @testset "gradient helpers (extension)" begin
-      # array-valued parameters: `Optimisers.destructure` (used by grad_fd_ps)
+      # array-valued parameters: `Optimisers.destructure` (used by grad_fwd_ps)
       # only flattens array leaves, matching real Lux-model usage.
       model(X, ps, st) = (sum(ps.w .* X), st)
       ps = (w = randn(4),)
       st = NamedTuple()
       X  = randn(4)
-      @test grad_zy(X, model, ps, st) ≈ ps.w           # ∂/∂X = w
-      @test grad_zy_ps(X, model, ps, st).w ≈ X         # ∂/∂w = X
-      @test grad_fd_ps(X, model, ps, st).w ≈ X         # ∂/∂w = X
+      @test grad_zy(X, model, ps, st) ≈ ps.w            # Zygote   ∂/∂X = w
+      @test grad_fwd(X, model, ps, st) ≈ ps.w           # ForwardDiff ∂/∂X = w
+      @test grad_zy_ps(X, model, ps, st).w ≈ X          # Zygote   ∂/∂w = X
+      @test grad_fwd_ps(X, model, ps, st).w ≈ X         # ForwardDiff ∂/∂w = X
    end
 
 end

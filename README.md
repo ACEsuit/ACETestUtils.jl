@@ -17,7 +17,7 @@ Current contents:
 - [Finite-difference & display helpers](#finite-difference--display-helpers) —
   `fdtest`, `dirfdtest`, `print_tf`, `println_slim`.
 - [Gradient-testing helpers](#gradient-testing-helpers) (extensions) — `grad_zy`,
-  `grad_zy_ps` (load `Zygote`), `grad_fd_ps` (load `ForwardDiff`).
+  `grad_zy_ps` (load `Zygote`); `grad_fwd`, `grad_fwd_ps` (load `ForwardDiff`).
 
 ## Installation
 
@@ -138,18 +138,20 @@ only when the relevant AD package is present, so the core package stays
 lightweight:
 
 - `ACETestUtilsZygoteExt` (load `Zygote`) → `grad_zy`, `grad_zy_ps`
-- `ACETestUtilsForwardDiffExt` (load `ForwardDiff`) → `grad_fd_ps`
+- `ACETestUtilsForwardDiffExt` (load `ForwardDiff`) → `grad_fwd`, `grad_fwd_ps`
 
-`Optimisers` (used by `grad_fd_ps` via `destructure`) is a core dependency, so it
-is not an extension trigger. The ETGraph-specific `grad_fd` is intentionally
-*not* included (it would invert the dependency on EquivariantTensors).
+`fwd` denotes ForwardDiff (not finite difference — cf. `fdtest`). `Optimisers`
+(used by `grad_fwd_ps` via `destructure`) is a core dependency, so it is not an
+extension trigger. The ETGraph-specific `grad_fd` is intentionally *not*
+included (it would invert the dependency on EquivariantTensors).
 
 ```julia
 using ACETestUtils, Zygote, ForwardDiff
 
-grad_zy(X, model, ps, st)      # Zygote ∂/∂X of model(·, ps, st)[1]
-grad_zy_ps(X, model, ps, st)   # Zygote ∂/∂ps of model(X, ·, st)[1]
-grad_fd_ps(G, model, ps, st)   # ForwardDiff ∂/∂ps via Optimisers.destructure
+grad_zy(X, model, ps, st)       # Zygote      ∂/∂X  of model(·, ps, st)[1]
+grad_fwd(X, model, ps, st)      # ForwardDiff ∂/∂X  of model(·, ps, st)[1]
+grad_zy_ps(X, model, ps, st)    # Zygote      ∂/∂ps of model(X, ·, st)[1]
+grad_fwd_ps(G, model, ps, st)   # ForwardDiff ∂/∂ps via Optimisers.destructure
 ```
 
 Calling these without the relevant AD package loaded throws a `MethodError`.
