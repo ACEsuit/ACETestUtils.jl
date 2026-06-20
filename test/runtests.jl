@@ -1,6 +1,6 @@
 using ACETestUtils, Test
 using StaticArrays: SVector
-using Zygote, ForwardDiff, Optimisers     # triggers ACETestUtilsGradExt
+using Zygote, ForwardDiff   # trigger ACETestUtilsZygoteExt / ACETestUtilsForwardDiffExt
 
 @testset "ACETestUtils.jl" begin
 
@@ -29,7 +29,6 @@ using Zygote, ForwardDiff, Optimisers     # triggers ACETestUtilsGradExt
       # display helpers run without error
       res = @test 1 == 1
       @test (print_tf(res); println_slim(res); true)
-      @test (h0("a"); h1("b"); h2("c"); h3("d"); true)
    end
 
    @testset "gradient helpers (extension)" begin

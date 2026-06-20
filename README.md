@@ -15,10 +15,9 @@ Current contents:
 - [`gpu_test_backend()`](#gpu-backend-discovery) — discover and set up the GPU
   backend for a test suite.
 - [Finite-difference & display helpers](#finite-difference--display-helpers) —
-  `fdtest`, `dirfdtest`, `print_tf`, `println_slim`, `h0`–`h3`.
-- [Gradient-testing helpers](#gradient-testing-helpers) (extension) — `grad_zy`,
-  `grad_zy_ps`, `grad_fd_ps`, loaded only when Zygote/ForwardDiff/Optimisers are
-  present.
+  `fdtest`, `dirfdtest`, `print_tf`, `println_slim`.
+- [Gradient-testing helpers](#gradient-testing-helpers) (extensions) — `grad_zy`,
+  `grad_zy_ps` (load `Zygote`), `grad_fd_ps` (load `ForwardDiff`).
 
 ## Installation
 
@@ -116,7 +115,7 @@ is unchanged. `test_fio` is *not* included — it stays in ACEbase, where it
 depends on `ACEbase.FIO`.
 
 ```julia
-using ACETestUtils: fdtest, dirfdtest, print_tf, println_slim, h0, h1, h2, h3
+using ACETestUtils: fdtest, dirfdtest, print_tf, println_slim
 
 # first-order finite-difference consistency check between F and its gradient dF;
 # returns true/false. Works for x::AbstractVector, x::Number, and
@@ -126,31 +125,34 @@ fdtest(F, dF, x; h0 = 1.0, verbose = true)
 # directional variant
 dirfdtest(F, dF, x, u; kwargs...)
 
-# compact display of @test results and colored section headers:
+# compact display of @test results:
 print_tf(result)        # "+" / "-" / "x"
 println_slim(result)    # "Test Passed" / "Test Failed"
-h0("title"); h1(…); h2(…); h3(…)
 ```
 
 ## Gradient-testing helpers
 
 Generic, Lux-model-agnostic gradient helpers ported from EquivariantTensors.jl
-(see EquivariantTensors.jl#132). They live in a **package extension**
-(`ACETestUtilsGradExt`) that loads only when `Zygote`, `ForwardDiff` and
-`Optimisers` are all present — so the core package stays lightweight and these
-heavy AD packages are pulled in only by suites that actually use them. The
-ETGraph-specific `grad_fd` is intentionally *not* included (it would invert the
-dependency on EquivariantTensors).
+(see EquivariantTensors.jl#132). They live in **package extensions** that load
+only when the relevant AD package is present, so the core package stays
+lightweight:
+
+- `ACETestUtilsZygoteExt` (load `Zygote`) → `grad_zy`, `grad_zy_ps`
+- `ACETestUtilsForwardDiffExt` (load `ForwardDiff`) → `grad_fd_ps`
+
+`Optimisers` (used by `grad_fd_ps` via `destructure`) is a core dependency, so it
+is not an extension trigger. The ETGraph-specific `grad_fd` is intentionally
+*not* included (it would invert the dependency on EquivariantTensors).
 
 ```julia
-using ACETestUtils, Zygote, ForwardDiff, Optimisers   # all three load the ext
+using ACETestUtils, Zygote, ForwardDiff
 
 grad_zy(X, model, ps, st)      # Zygote ∂/∂X of model(·, ps, st)[1]
 grad_zy_ps(X, model, ps, st)   # Zygote ∂/∂ps of model(X, ·, st)[1]
 grad_fd_ps(G, model, ps, st)   # ForwardDiff ∂/∂ps via Optimisers.destructure
 ```
 
-Calling these without the AD packages loaded throws a `MethodError`.
+Calling these without the relevant AD package loaded throws a `MethodError`.
 
 ## Contributing
 

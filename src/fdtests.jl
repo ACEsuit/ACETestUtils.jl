@@ -1,50 +1,13 @@
-# Finite-difference and display test helpers, ported from `ACEbase.Testing`
-# (see ACEsuit/ACEbase.jl#11). The port is faithful — behaviour is preserved;
-# `test_fio` is intentionally left in ACEbase as it depends on `ACEbase.FIO`.
+# Finite-difference gradient-consistency tests, ported from `ACEbase.Testing`
+# (see ACEsuit/ACEbase.jl#11). The port is faithful — behaviour is preserved.
+# `test_fio` is intentionally left in ACEbase (it depends on `ACEbase.FIO`).
+# `_Vec` / `_svecs` live in `utils.jl`.
 
-using Test, Printf
+using Printf
 using LinearAlgebra: norm
-using StaticArrays: StaticVector, SVector
+using StaticArrays: StaticVector
 
-export print_tf, println_slim, h0, h1, h2, h3, fdtest, dirfdtest
-
-function h0(str)
-   dashes = "≡"^(length(str)+4)
-   printstyled(dashes, color=:magenta); println()
-   printstyled("  "*str*"  ", bold=true, color=:magenta); println()
-   printstyled(dashes, color=:magenta); println()
-end
-
-function h1(str)
-   dashes = "="^(length(str)+2)
-   printstyled(dashes, color=:magenta); println()
-   printstyled(" " * str * " ", bold=true, color=:magenta); println()
-   printstyled(dashes, color=:magenta); println()
-end
-
-function h2(str)
-   dashes = "-"^length(str)
-   printstyled(dashes, color=:magenta); println()
-   printstyled(str, bold=true, color=:magenta); println()
-   printstyled(dashes, color=:magenta); println()
-end
-
-h3(str) = (printstyled(str, bold=true, color=:magenta); println())
-
-
-print_tf(::Test.Pass) = printstyled("+", bold=true, color=:green)
-print_tf(::Test.Fail) = printstyled("-", bold=true, color=:red)
-print_tf(::Tuple{Test.Error,Bool}) = printstyled("x", bold=true, color=:magenta)
-
-println_slim(::Test.Pass) = printstyled("Test Passed\n", bold=true, color=:green)
-println_slim(::Test.Fail) = printstyled("Test Failed\n", bold=true, color=:red)
-
-_Vec(X::AbstractVector{<: StaticVector{3}}) =
-      collect(reinterpret(Float64, X))
-
-_svecs(x::AbstractVector{T}) where {T} =
-      collect(reinterpret(SVector{3, T}, x))
-
+export fdtest, dirfdtest
 
 fdtest(F, dF, X::AbstractVector{<: StaticVector{3}}; kwargs...) =
       fdtest( x -> F(_svecs(x)),
