@@ -49,9 +49,11 @@ Use it to set preferences, conventions, and constraints.
 ## Releases
 
 - When registering a new version (via `@JuliaRegistrator register`), always
-  include brief release notes summarising the changes (use the `Release notes:`
-  block in the registrator comment). Keep them short — a few bullets covering
+  include brief release notes summarising the changes — a few bullets covering
   new/changed/breaking items. TagBot folds them into the GitHub release.
+- Put the `Release notes:` block in the **initial** registration comment, not a
+  follow-up: AutoMerge can complete before a second invocation is processed, in
+  which case the notes are lost (recover by editing the GitHub release directly).
 
 ---
 
