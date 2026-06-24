@@ -46,6 +46,13 @@ Use it to set preferences, conventions, and constraints.
 - Record co-authorship: add a Co-Authored-By trailer when Claude authors or co-authors the commit.
 - For pull requests, keep the explanations brief unless prompted to give more details
 
+## Releases
+
+- When registering a new version (via `@JuliaRegistrator register`), always
+  include brief release notes summarising the changes (use the `Release notes:`
+  block in the registrator comment). Keep them short — a few bullets covering
+  new/changed/breaking items. TagBot folds them into the GitHub release.
+
 ---
 
 ## What NOT to do
